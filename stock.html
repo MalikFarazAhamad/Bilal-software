@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stock Summary - Material Shop</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial;
+}
+
+body {
+  background: #f8fafc;
+  
+}
+
+nav {
+  background: #0f172a;
+  padding: 12px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  margin: 0 8px;
+  padding: 6px 14px;
+  background: #334155;
+  border-radius: 20px;
+  transition: 0.3s;
+}
+
+nav a:hover {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.container {
+  max-width: 900px;
+  margin: 20px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+  color: #0f172a;
+  margin-bottom: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  background: #0f172a;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.stock-display {
+  background: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  margin-top: 15px;
+  font-size: 14px;
+  overflow-x: auto;
+}
+
+.stock-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.stock-table th, .stock-table td {
+  border: 1px solid #cbd5e1;
+  padding: 10px;
+  text-align: center;
+}
+
+.stock-table th {
+  background: #0f172a;
+  color: #fff;
+}
+
+.unavailable {
+  color: red;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Dashboard</a>
+  <a href="prices.html">Prices</a>
+  <a href="stock.html">Stock</a>
+  <a href="billing.html">Billing</a>
+</nav>
+
+<div class="container">
+  <h2>Stock Summary</h2>
+
+  <div id="stockInputs"></div>
+  <button onclick="addStock()">Add Stock</button>
+
+  <div class="stock-display" id="stockView"></div>
+</div>
+
+<script>
+// ITEMS LIST
+const items = {
+  dg: "DG Cement",
+  ml: "Maple Leaf",
+  fp: "Flying Pakistan",
+  mlw: "Maple Leaf White",
+  s4: "Saria 4 CC",
+  s3: "Saria 3 CC",
+  s2: "Saria 2",
+  s6: "Saria 6",
+  sl4: "Saria Local 4",
+  sl3: "Saria Local 3",
+  sg: "Small Gravel",
+  lg: "Large Gravel"
+};
+
+// LOAD INPUT FIELDS
+window.onload = function() {
+  for (let k in items) {
+    stockInputs.innerHTML += `${items[k]} <input id="s_${k}" type="number" min="0" placeholder="Add Stock"><br>`;
+  }
+  showStock();
+}
+
+// ADD STOCK
+function addStock() {
+  for (let k in items) {
+    let val = document.getElementById("s_" + k).value;
+    if (val) localStorage.setItem(k, (+localStorage.getItem(k) || 0) + (+val));
+    document.getElementById("s_" + k).value = "";
+  }
+  showStock();
+}
+
+// SHOW STOCK IN 3 ROW × N COLUMN TABLE
+function showStock() {
+  let headers = Object.values(items);
+  
+  // Compute values
+  let originalArr = headers.map((_, i) => +localStorage.getItem(Object.keys(items)[i]) || 0);
+  let soldArr = headers.map((_, i) => +localStorage.getItem(Object.keys(items)[i] + "_sold") || 0);
+  let availableArr = originalArr.map((v, i) => v - soldArr[i]);
+
+  let table = "<table class='stock-table'><thead><tr><th></th>";
+  headers.forEach(h => table += `<th>${h}</th>`);
+  table += "</tr></thead><tbody>";
+
+  table += "<tr><td>Total Quantity</td>";
+  originalArr.forEach(v => table += `<td>${v}</td>`);
+  table += "</tr>";
+
+  table += "<tr><td>Sold Quantity</td>";
+  soldArr.forEach(v => table += `<td>${v}</td>`);
+  table += "</tr>";
+
+  table += "<tr><td>Available / Pending</td>";
+  availableArr.forEach(v => table += `<td>${v <= 0 ? '<span class="unavailable">0 - Sold Out</span>' : v}</td>`);
+  table += "</tr>";
+
+  table += "</tbody></table>";
+  stockView.innerHTML = table;
+}
+
+// FUNCTION TO UPDATE SOLD STOCK (CALL FROM BILLING)
+function updateSoldStock(itemKey, qty) {
+  let currentSold = +localStorage.getItem(itemKey + "_sold") || 0;
+  localStorage.setItem(itemKey + "_sold", currentSold + qty);
+  showStock();
+}
+</script>
+
+</body>
+</html>

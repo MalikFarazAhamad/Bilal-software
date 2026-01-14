@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Billing + Sales History</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+body{background:#f1f5f9;}
+nav{background:#0f172a;padding:12px;text-align:center;border-radius:10px;}
+nav a{color:#fff;text-decoration:none;margin:0 8px;padding:6px 14px;background:#334155;border-radius:20px;}
+nav a:hover{background:#38bdf8;color:#0f172a;}
+.container{max-width:700px;margin:20px auto;background:#fff;padding:20px;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.1);}
+h2{text-align:center;color:#0f172a;margin-bottom:15px;}
+label{display:block;margin:10px 0 4px;font-weight:bold;}
+input, select{width:100%;padding:8px;margin-bottom:10px;border-radius:8px;border:1px solid #cbd5e1;}
+button{width:100%;padding:10px;margin-top:5px;background:#0f172a;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:16px;}
+button:hover{background:#38bdf8;color:#0f172a;}
+.bill-list{max-height:200px;overflow:auto;margin-top:15px;font-size:14px;}
+.bill-row{border-bottom:1px solid #e2e8f0;padding:5px 0;}
+.total{font-weight:bold;margin-top:10px;font-size:16px;}
+.history{margin-top:30px;background:#f1f5f9;padding:15px;border-radius:12px;}
+.history h3{text-align:center;margin-bottom:10px;}
+.history-row{border-bottom:1px solid #cbd5e1;padding:5px 0;font-size:13px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Dashboard</a>
+  <a href="prices.html">Prices</a>
+  <a href="stock.html">Stock</a>
+  <a href="billing.html">Billing</a>
+</nav>
+
+<div class="container">
+<h2>Generate Bill</h2>
+
+<label for="custName">Customer Name *</label>
+<input id="custName" placeholder="Enter customer name">
+
+<label for="custMobile">Mobile Number (11 digits) *</label>
+<input id="custMobile" placeholder="03XXXXXXXXX" maxlength="11">
+
+<hr>
+
+<label for="item">Select Item</label>
+<select id="item"></select>
+
+<label for="qty">Quantity</label>
+<input id="qty" type="number" placeholder="Qty">
+
+<div class="bill-list" id="billList"></div>
+<div class="total">Total: Rs <span id="grand">0</span></div>
+
+<button onclick="addBill()">Add Item</button>
+<button onclick="printBill()">Print & Save</button>
+
+<div class="history">
+<h3>Last 3 Months Sales History</h3>
+<div id="historyList"></div>
+</div>
+</div>
+
+<script>
+// ITEMS LIST
+const items={
+  dg:"DG Cement",
+  ml:"Maple Leaf",
+  fp:"Flying Pakistan",
+  mlw:"Maple Leaf White",
+  s4:"Saria 4 CC",
+  s3:"Saria 3 CC",
+  s2:"Saria 2",
+  s6:"Saria 6",
+  sl4:"Saria Local 4",
+  sl3:"Saria Local 3",
+  sg:"Small Gravel",
+  lg:"Large Gravel"
+};
+
+let bill=[];
+
+// LOAD ITEMS IN SELECT
+window.onload=function(){
+  for(let k in items) item.innerHTML+=`<option value="${k}">${items[k]}</option>`;
+  showHistory();
+}
+
+// ADD ITEM TO BILL
+function addBill(){
+ let k=item.value;
+ let q=+qty.value;
+ let stock=+localStorage.getItem(k)||0;
+ let rate=+localStorage.getItem("price_"+k)||0;
+
+ if(q<=0){alert("Enter quantity"); return;}
+ if(q>stock){alert("Stock not available"); return;}
+ if(rate<=0){alert("Set price first"); return;}
+
+ localStorage.setItem(k,stock-q); // deduct stock
+ bill.push({name:items[k],qty:q,rate:rate,total:q*rate});
+ renderBill();
+ qty.value="";
+}
+
+// RENDER BILL PREVIEW
+function renderBill(){
+ billList.innerHTML=""; let g=0;
+ bill.forEach(b=>{
+   g+=b.total;
+   billList.innerHTML+=`<div class="bill-row">${b.name} | ${b.qty} × ${b.rate} = ${b.total}</div>`;
+ });
+ grand.innerText=g;
+}
+
+// PRINT BILL + SAVE HISTORY
+function printBill(){
+ const name=custName.value.trim();
+ const mobile=custMobile.value.trim();
+ if(!name){alert("Customer name required");return;}
+ if(!mobile.match(/^\d{11}$/)){alert("Enter valid 11-digit mobile number");return;}
+ if(bill.length===0){alert("Add at least one item");return;}
+
+ const shopName="AL-BASHIL", shopOwner="Main Bilal Ahmad", shopMobile="03046140407";
+ const total=grand.innerText;
+ const date=new Date();
+
+ // SAVE HISTORY
+ let history=JSON.parse(localStorage.getItem("salesHistory")||"[]");
+ history.push({date:date.toISOString(),customer:name,mobile:mobile,bill:bill,total:+total});
+ const threeMonthsAgo=new Date();
+ threeMonthsAgo.setMonth(threeMonthsAgo.getMonth()-3);
+ history=history.filter(h=>new Date(h.date)>=threeMonthsAgo);
+ localStorage.setItem("salesHistory",JSON.stringify(history));
+ showHistory();
+
+ // PRINT - TABLE FORMAT
+ let w = window.open("", "", "width=400");
+ w.document.write(`<style>
+ body{font-family:monospace;font-size:12px;}
+ table{width:100%;border-collapse:collapse;}
+ th,td{border:1px solid #000;padding:4px;text-align:left;}
+ h2,h3{margin:2px;padding:0;text-align:center;}
+ </style>`);
+
+// SHOP INFO
+w.document.write(`<h2>${shopName}</h2>`);
+w.document.write(`<h3>Owner: ${shopOwner} | Contact: ${shopMobile}</h3><hr>`);
+
+// DATE & TIME + CUSTOMER INFO
+w.document.write(`<strong>Date & Time:</strong> ${date.toLocaleDateString()} ${date.toLocaleTimeString()}<br>`);
+w.document.write(`<strong>Customer:</strong> ${name}<br><strong>Mobile:</strong> ${mobile}<hr>`);
+
+// BILL TABLE
+w.document.write(`<table><thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Total</th></tr></thead><tbody>`);
+bill.forEach(b=>{
+  w.document.write(`<tr><td>${b.name}</td><td>${b.qty}</td><td>${b.rate}</td><td>${b.total}</td></tr>`);
+});
+w.document.write(`</tbody></table><hr><strong>Total: Rs ${total}</strong>`);
+w.print();
+
+// RESET BILL
+bill=[]; renderBill();
+custName.value=""; custMobile.value="";
+}
+
+// SHOW LAST 3 MONTHS HISTORY
+function showHistory(){
+ const history=JSON.parse(localStorage.getItem("salesHistory")||"[]");
+ const historyDiv=document.getElementById("historyList");
+ historyDiv.innerHTML="";
+ if(history.length===0){historyDiv.innerHTML="No history available"; return;}
+ history.forEach(h=>{
+   const d=new Date(h.date);
+   historyDiv.innerHTML+=`<div class="history-row">${d.toLocaleDateString()} ${d.toLocaleTimeString()} | ${h.customer} (${h.mobile}) | Total Rs ${h.total}</div>`;
+ });
+}
+</script>
+
+</body>
+</html>

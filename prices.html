@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Prices - Material Shop</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#f8fafc;}
+nav{background:#0f172a;padding:12px;text-align:center;border-radius:10px;}
+nav a{color:#fff;text-decoration:none;margin:0 8px;padding:6px 14px;background:#334155;border-radius:20px;}
+nav a:hover{background:#38bdf8;color:#0f172a;}
+.container{max-width:600px;margin:20px auto;background:#fff;padding:20px;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.1);}
+h2{text-align:center;color:#0f172a;margin-bottom:15px}
+input{width:100%;padding:8px;margin-bottom:10px;border-radius:8px;border:1px solid #cbd5e1;}
+button{width:100%;padding:10px;margin-top:5px;background:#0f172a;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:16px;}
+button:hover{background:#38bdf8;color:#0f172a;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Dashboard</a>
+  <a href="prices.html">Prices</a>
+  <a href="stock.html">Stock</a>
+  <a href="billing.html">Billing</a>
+</nav>
+
+<div class="container">
+<h2>Daily Prices</h2>
+<div id="priceInputs"></div>
+<button onclick="savePrices()">Save / Update Prices</button>
+<button onclick="resetPrices()">Reset Prices</button>
+</div>
+
+<script>
+const items={dg:"DG Cement",ml:"Maple Leaf",fp:"Flying Pakistan",mlw:"Maple Leaf White",s4:"Saria 4 CC",s3:"Saria 3 CC",s2:"Saria 2",s6:"Saria 6",sl4:"Saria Local 4",sl3:"Saria Local 3",gr:"Gravel"};
+
+window.onload=function(){
+ for(let k in items){
+  priceInputs.innerHTML+=`${items[k]} <input id="p_${k}" type="number" min="0"><br>`;
+  if(localStorage.getItem("price_"+k))document.getElementById("p_"+k).value=localStorage.getItem("price_"+k);
+ }
+};
+
+function savePrices(){
+ for(let k in items){
+  let v=document.getElementById("p_"+k).value;
+  if(v) localStorage.setItem("price_"+k,v);
+ }
+ alert("Prices Updated");
+}
+
+function resetPrices(){
+ for(let k in items) localStorage.removeItem("price_"+k);
+ alert("Prices Reset");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Material Shop | Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#f1f5f9;}
+nav{background:#0f172a;padding:12px;text-align:center;border-radius:10px;}
+nav a{color:#fff;text-decoration:none;margin:0 8px;padding:6px 14px;background:#334155;border-radius:20px;}
+nav a:hover{background:#38bdf8;color:#0f172a;}
+header{text-align:center;padding:30px}
+header h1{color:#0f172a;}
+header p{color:#475569;margin-top:5px;}
+.cards{display:flex;gap:20px;justify-content:center;padding:30px;flex-wrap:wrap;}
+.card{background:#fff;padding:25px 40px;border-radius:20px;box-shadow:0 5px 15px rgba(0,0,0,0.1);font-size:18px;cursor:pointer;transition:0.3s;}
+.card:hover{transform:translateY(-6px);box-shadow:0 12px 25px rgba(0,0,0,0.15);}
+footer{text-align:center;padding:15px;background:#0f172a;color:#fff;margin-top:40px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Dashboard</a>
+  <a href="prices.html">Prices</a>
+  <a href="stock.html">Stock</a>
+  <a href="billing.html">Billing</a>
+</nav>
+
+<header>
+  <h1>Material Shop Software</h1>
+  <p>Cement • Saria • Gravel</p>
+</header>
+
+<div class="cards">
+  <div class="card" onclick="alert('Stock Management Page')">📦 Stock Management</div>
+  <div class="card" onclick="alert('Price Control Page')">💰 Price Control</div>
+  <div class="card" onclick="alert('Billing & Print Page')">🧾 Billing & Print</div>
+</div>
+
+<footer>© 2026 Material Shop</footer>
+
+</body>
+</html>

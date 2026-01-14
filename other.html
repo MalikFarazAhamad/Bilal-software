@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Billing - Material Shop</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#f1f5f9;padding:15px}
+nav{
+  background:#0f172a;
+  padding:12px;
+  text-align:center;
+  border-radius:10px;
+}
+nav a{
+  color:#fff;
+  text-decoration:none;
+  margin:0 8px;
+  background:#334155;
+  padding:6px 14px;
+  border-radius:20px;
+}
+.container{
+  max-width:600px;
+  margin:20px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+h2{text-align:center;color:#0f172a;margin-bottom:15px}
+label{display:block;margin:10px 0 4px;font-weight:bold}
+input, select{
+  width:100%;
+  padding:8px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:1px solid #cbd5e1;
+}
+button{
+  width:100%;
+  padding:10px;
+  background:#0f172a;
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:16px;
+}
+button:hover{background:#38bdf8;color:#0f172a}
+
+.bill-list{
+  max-height:250px;
+  overflow:auto;
+  margin-top:15px;
+  font-size:14px;
+}
+.bill-row{
+  border-bottom:1px solid #e2e8f0;
+  padding:5px 0;
+}
+.total{font-weight:bold;margin-top:10px;font-size:16px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Dashboard</a>
+  <a href="prices.html">Prices</a>
+  <a href="stock.html">Stock</a>
+  <a href="billing.html">Billing</a>
+</nav>
+
+<div class="container">
+<h2>Generate Bill</h2>
+
+<!-- Customer Info -->
+<label for="custName">Customer Name *</label>
+<input id="custName" placeholder="Enter customer name">
+
+<label for="custMobile">Mobile Number (11 digits) *</label>
+<input id="custMobile" placeholder="03XXXXXXXXX" maxlength="11">
+
+<hr>
+
+<!-- Item Selection -->
+<label for="item">Select Item</label>
+<select id="item"></select>
+
+<label for="qty">Quantity</label>
+<input id="qty" type="number" placeholder="Qty">
+
+<div class="bill-list" id="billList"></div>
+<div class="total">Total: Rs <span id="grand">0</span></div>
+
+<button onclick="addBill()">Add Item</button>
+<button onclick="printBill()">Print Bill</button>
+</div>
+
+<script>
+// Material list including Gravel
+const items={
+ dg:"DG Cement",
+ ml:"Maple Leaf",
+ fp:"Flying Pakistan",
+ mlw:"Maple Leaf White",
+ s4:"Saria 4 CC",
+ s3:"Saria 3 CC",
+ s2:"Saria 2",
+ s6:"Saria 6",
+ sl4:"Saria Local 4",
+ sl3:"Saria Local 3",
+ gr:"Gravel"
+};
+
+let bill=[];
+
+// Load items in select
+window.onload=function(){
+  for(let k in items){
+    item.innerHTML+=`<option value="${k}">${items[k]}</option>`;
+  }
+};
+
+// Add Item to Bill
+function addBill(){
+  let k=item.value;
+  let q=+qty.value;
+  let stock=+localStorage.getItem(k)||0;
+  let rate=+localStorage.getItem("price_"+k)||0;
+
+  if(q<=0){alert("Enter quantity");return;}
+  if(q>stock){alert("Stock not available");return;}
+  if(rate<=0){alert("Set price first");return;}
+
+  localStorage.setItem(k,stock-q); // Reduce stock
+  bill.push({name:items[k],qty:q,rate,total:q*rate});
+  renderBill();
+  qty.value="";
+}
+
+// Render bill preview
+function renderBill(){
+  billList.innerHTML="";
+  let g=0;
+  bill.forEach(b=>{
+    g+=b.total;
+    billList.innerHTML+=`<div class="bill-row">${b.name} | ${b.qty} × ${b.rate} = ${b.total}</div>`;
+  });
+  grand.innerText=g;
+}
+
+// Print bill
+function printBill(){
+  const name=custName.value.trim();
+  const mobile=custMobile.value.trim();
+  
+  if(!name){alert("Customer name is required");return;}
+  if(!mobile.match(/^\d{11}$/)){alert("Enter valid 11-digit mobile number");return;}
+  if(bill.length===0){alert("Add at least one item");return;}
+
+  const shopName="AL-BASHIL";
+  const shopOwner="Main Bilal Ahmad";
+  const shopMobile="03046140407";
+
+  let w=window.open("","","width=400");
+  w.document.write(`<h2>${shopName}</h2>`);
+  w.document.write(`<strong>Owner:</strong> ${shopOwner}<br>`);
+  w.document.write(`<strong>Contact:</strong> ${shopMobile}<br><hr>`);
+  w.document.write(`<strong>Customer:</strong> ${name}<br>`);
+  w.document.write(`<strong>Mobile:</strong> ${mobile}<br><hr>`);
+
+  bill.forEach(b=>{
+    w.document.write(`${b.name} - ${b.qty} × ${b.rate} = ${b.total}<br>`);
+  });
+  w.document.write(`<hr><strong>Total: Rs ${grand.innerText}</strong>`);
+  w.print();
+}
+</script>
+
+</body>
+</html>
