@@ -1,116 +1,130 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Stock Summary - Material Shop</title>
+
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+body{
+  background:#f8fafc;
+}
+nav{
+  background:#0f172a;
+  padding:12px;
+  text-align:center;
+  border-radius:10px;
+}
+nav a{
+  color:#fff;
+  text-decoration:none;
+  margin:0 8px;
+  padding:6px 14px;
+  background:#334155;
+  border-radius:20px;
+}
+nav a:hover{
+  background:#38bdf8;
+  color:#0f172a;
+}
+.container{
+  max-width:1200px; /* BOX INCREASED */
+  margin:20px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+h2{
+  text-align:center;
+  margin-bottom:15px;
 }
 
-body {
-  background: #f8fafc;
-  
+.stock-row{
+  display:flex;
+  gap:8px;
+  margin-bottom:8px;
+  flex-wrap:wrap;
+}
+.stock-row input{
+  flex:1;
+  min-width:180px;
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #cbd5e1;
+}
+.stock-row button{
+  padding:8px 12px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
 }
 
-nav {
-  background: #0f172a;
-  padding: 12px;
-  text-align: center;
-  border-radius: 10px;
+.save-btn{
+  background:#0f172a;
+  color:#fff;
+}
+.reset-btn{
+  background:#dc2626;
+  color:#fff;
+}
+.save-btn:hover{background:#38bdf8;color:#0f172a;}
+.reset-btn:hover{background:#ef4444;}
+
+.big-btn{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  font-size:16px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+.save-all{
+  background:#16a34a;
+  color:#fff;
+}
+.reset-all{
+  background:#dc2626;
+  color:#fff;
 }
 
-nav a {
-  color: #fff;
-  text-decoration: none;
-  margin: 0 8px;
-  padding: 6px 14px;
-  background: #334155;
-  border-radius: 20px;
-  transition: 0.3s;
+.stock-display{
+  margin-top:20px;
+  padding:15px;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  overflow-x:auto; /* TABLE FIX */
 }
 
-nav a:hover {
-  background: #38bdf8;
-  color: #0f172a;
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px; /* TABLE SMALL */
 }
-
-.container {
-  max-width: 900px;
-  margin: 20px auto;
-  background: #fff;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+th,td{
+  border:1px solid #cbd5e1;
+  padding:8px;
+  text-align:center;
 }
-
-h2 {
-  text-align: center;
-  color: #0f172a;
-  margin-bottom: 15px;
+th{
+  background:#0f172a;
+  color:#fff;
 }
-
-input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  background: #0f172a;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-button:hover {
-  background: #38bdf8;
-  color: #0f172a;
-}
-
-.stock-display {
-  background: #fff;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  margin-top: 15px;
-  font-size: 14px;
-  overflow-x: auto;
-}
-
-.stock-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-.stock-table th, .stock-table td {
-  border: 1px solid #cbd5e1;
-  padding: 10px;
-  text-align: center;
-}
-
-.stock-table th {
-  background: #0f172a;
-  color: #fff;
-}
-
-.unavailable {
-  color: red;
-  font-weight: bold;
+.unavailable{
+  color:red;
+  font-weight:bold;
 }
 </style>
 </head>
+
 <body>
 
 <nav>
@@ -124,79 +138,119 @@ button:hover {
   <h2>Stock Summary</h2>
 
   <div id="stockInputs"></div>
-  <button onclick="addStock()">Add Stock</button>
+
+  <!-- SAVE ALL -->
+  <button class="big-btn save-all" onclick="saveAllStock()">Save All Stock</button>
+
+  <!-- RESET ALL -->
+  <button class="big-btn reset-all" onclick="resetAllStock()">Reset All Stock</button>
 
   <div class="stock-display" id="stockView"></div>
 </div>
 
 <script>
-// ITEMS LIST
 const items = {
-  dg: "DG Cement",
-  ml: "Maple Leaf",
-  fp: "Flying Pakistan",
-  mlw: "Maple Leaf White",
-  s4: "Saria 4 CC",
-  s3: "Saria 3 CC",
-  s2: "Saria 2",
-  s6: "Saria 6",
-  sl4: "Saria Local 4",
-  sl3: "Saria Local 3",
-  sg: "Small Gravel",
-  lg: "Large Gravel"
+  dg:"DG Cement",
+  ml:"Maple Leaf",
+  fp:"Flying Pakistan",
+  mlw:"Maple Leaf White",
+  s4:"Saria 4 CC",
+  s3:"Saria 3 CC",
+  s2:"Saria 2",
+  s6:"Saria 6",
+  sl4:"Saria Local 4",
+  sl3:"Saria Local 3",
+  sg:"Small Gravel",
+  lg:"Large Gravel"
 };
 
-// LOAD INPUT FIELDS
-window.onload = function() {
-  for (let k in items) {
-    stockInputs.innerHTML += `${items[k]} <input id="s_${k}" type="number" min="0" placeholder="Add Stock"><br>`;
+// LOAD INPUTS
+window.onload=()=>{
+  for(let k in items){
+    stockInputs.innerHTML+=`
+      <label><b>${items[k]}</b></label>
+      <div class="stock-row">
+        <input type="number" id="s_${k}" placeholder="Add Stock" min="0">
+        <button class="save-btn" onclick="saveSingle('${k}')">Save</button>
+        <button class="reset-btn" onclick="resetSingle('${k}')">Reset</button>
+      </div>
+    `;
+  }
+  showStock();
+};
+
+// SAVE SINGLE
+function saveSingle(k){
+  let i=document.getElementById("s_"+k);
+  let v=+i.value;
+  if(!v) return;
+  localStorage.setItem(k,(+localStorage.getItem(k)||0)+v);
+  i.value="";
+  showStock();
+}
+
+// SAVE ALL
+function saveAllStock(){
+  for(let k in items){
+    let i=document.getElementById("s_"+k);
+    let v=+i.value;
+    if(v){
+      localStorage.setItem(k,(+localStorage.getItem(k)||0)+v);
+      i.value="";
+    }
   }
   showStock();
 }
 
-// ADD STOCK
-function addStock() {
-  for (let k in items) {
-    let val = document.getElementById("s_" + k).value;
-    if (val) localStorage.setItem(k, (+localStorage.getItem(k) || 0) + (+val));
-    document.getElementById("s_" + k).value = "";
+// RESET SINGLE
+function resetSingle(k){
+  if(!confirm(`Reset ${items[k]} stock?`))return;
+  localStorage.removeItem(k);
+  localStorage.removeItem(k+"_sold");
+  showStock();
+}
+
+// RESET ALL
+function resetAllStock(){
+  if(!confirm("Reset ALL stock?"))return;
+  for(let k in items){
+    localStorage.removeItem(k);
+    localStorage.removeItem(k+"_sold");
   }
   showStock();
 }
 
-// SHOW STOCK IN 3 ROW × N COLUMN TABLE
-function showStock() {
-  let headers = Object.values(items);
-  
-  // Compute values
-  let originalArr = headers.map((_, i) => +localStorage.getItem(Object.keys(items)[i]) || 0);
-  let soldArr = headers.map((_, i) => +localStorage.getItem(Object.keys(items)[i] + "_sold") || 0);
-  let availableArr = originalArr.map((v, i) => v - soldArr[i]);
+// SHOW TABLE
+function showStock(){
+  let keys=Object.keys(items);
+  let names=Object.values(items);
 
-  let table = "<table class='stock-table'><thead><tr><th></th>";
-  headers.forEach(h => table += `<th>${h}</th>`);
-  table += "</tr></thead><tbody>";
+  let t=keys.map(k=>+localStorage.getItem(k)||0);
+  let s=keys.map(k=>+localStorage.getItem(k+"_sold")||0);
+  let a=t.map((v,i)=>v-s[i]);
 
-  table += "<tr><td>Total Quantity</td>";
-  originalArr.forEach(v => table += `<td>${v}</td>`);
-  table += "</tr>";
+  let h="<table><tr><th></th>";
+  names.forEach(n=>h+=`<th>${n}</th>`);
+  h+="</tr>";
 
-  table += "<tr><td>Sold Quantity</td>";
-  soldArr.forEach(v => table += `<td>${v}</td>`);
-  table += "</tr>";
+  h+="<tr><td>Total</td>";
+  t.forEach(v=>h+=`<td>${v}</td>`);
+  h+="</tr>";
 
-  table += "<tr><td>Available / Pending</td>";
-  availableArr.forEach(v => table += `<td>${v <= 0 ? '<span class="unavailable">0 - Sold Out</span>' : v}</td>`);
-  table += "</tr>";
+  h+="<tr><td>Sold</td>";
+  s.forEach(v=>h+=`<td>${v}</td>`);
+  h+="</tr>";
 
-  table += "</tbody></table>";
-  stockView.innerHTML = table;
+  h+="<tr><td>Available</td>";
+  a.forEach(v=>h+=`<td>${v<=0?'<span class="unavailable">0</span>':v}</td>`);
+  h+="</tr></table>";
+
+  stockView.innerHTML=h;
 }
 
-// FUNCTION TO UPDATE SOLD STOCK (CALL FROM BILLING)
-function updateSoldStock(itemKey, qty) {
-  let currentSold = +localStorage.getItem(itemKey + "_sold") || 0;
-  localStorage.setItem(itemKey + "_sold", currentSold + qty);
+// FOR BILLING
+function updateSoldStock(k,q){
+  localStorage.setItem(k+"_sold",(+localStorage.getItem(k+"_sold")||0)+q);
   showStock();
 }
 </script>
